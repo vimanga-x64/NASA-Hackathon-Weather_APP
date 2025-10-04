@@ -22,15 +22,25 @@ class WeatherForecastApp {
 
     private initMap(): void {
         console.log('Initializing map...');
+        const worldBounds =  L.latLngBounds(L.latLng(-90, -Infinity), L.latLng(90, Infinity));
         
         // Initialize map centered on NYC
-        this.map = L.map('map').setView([40.7128, -74.0060], 5);
+        this.map = L.map('map', {
+            worldCopyJump: true,
+
+            maxBounds: worldBounds,
+
+            maxBoundsViscosity: 1.0,
+
+        }).setView([40.7128, -74.0060], 5);
         
         console.log('Map created');
 
         // OpenStreetMap base layer
         const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
+            minZoom: 1.5,
+            bounds: worldBounds,
             attribution: '© OpenStreetMap contributors'
         });
 
@@ -40,6 +50,8 @@ class WeatherForecastApp {
             {
                 attribution: 'NASA GIBS',
                 maxZoom: 8,
+                minZoom: 1.5,
+                bounds: worldBounds,
                 opacity: 0.7
             }
         );
@@ -50,6 +62,8 @@ class WeatherForecastApp {
             {
                 attribution: 'NASA EOSDIS GIBS',
                 maxZoom: 9,
+                minZoom: 1.5,
+                bounds: worldBounds,
                 opacity: 0.8
             }
         );
