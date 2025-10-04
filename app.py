@@ -17,8 +17,30 @@ def recommend():
 
     if not location or not date or not preferences:
         return jsonify({'error': 'Missing required fields'}), 400
+    lat = location.get('latitude')
+    lon = location.get('longitude')
 
-    weather = get_weather_data(date, location)
+    if not date or not preferences or lat is None or lon is None:
+        return jsonify({'error': 'Missing required fields: location.latitude, location.longitude, date, preferences'}), 400
+
+    try:
+        weather_params = [
+            "temperature", "precipitation", "wind", "humidity", 
+            "clouds", "visibility", "pressure", "uvindex"
+        ]
+        
+        weather = get_weather_data(
+            lat=float(lat),
+            lon=float(lon),
+            date_iso=date,
+            frontend_params=weather_params
+        )
+    except (ValueError, RuntimeError) as e:
+        logging.error(f"Weather data error for location {location} on {date}: {e}")
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        logging.error(f"Failed to get weather data: {e}")
+        return jsonify({'error': 'An internal error occurred while fetching weather data'}), 500
     row = {
         "preferred_activities": preferences,
         "weather": weather
