@@ -549,9 +549,16 @@ class WeatherForecastApp {
 
     private initMap(): void {
         console.log('Initializing map...');
-        
+
+        const worldBounds =  L.latLngBounds(L.latLng(-90, -Infinity), L.latLng(90, Infinity));
+
         this.map = L.map('map', {
-            zoomControl: false
+            zoomControl: false,
+            worldCopyJump: true,
+
+            maxBounds: worldBounds,
+
+            maxBoundsViscosity: 1.0,
         }).setView([40.7128, -74.0060], 5);
         
         L.control.zoom({
@@ -562,14 +569,34 @@ class WeatherForecastApp {
 
         const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
+            minZoom: 1.5,
+            bounds: worldBounds,
             attribution: '© OpenStreetMap contributors'
         });
+
+        const provider = new OpenStreetMapProvider();
+        const searchControl = new GeoSearchControl({
+            provider: provider,
+            style: 'bar',
+            showMarker: true,
+            showPopup: false,
+            autoClose: true,
+            retainZoomLevel: false,
+            animateZoom: true,
+            keepResult: true,
+            searchLabel: 'Enter address',
+        });
+
+        this.map.addControl(searchControl)
 
         const nasaBlueMarble = L.tileLayer(
             'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpeg',
             {
                 attribution: 'NASA GIBS',
-                maxZoom: 8,
+                maxZoom: 19,
+                maxNativeZoom: 8,
+                minZoom: 1.5,
+                bounds: worldBounds,
                 opacity: 0.7
             }
         );
@@ -578,7 +605,10 @@ class WeatherForecastApp {
             `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/${this.getYesterdayDate()}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`,
             {
                 attribution: 'NASA EOSDIS GIBS',
-                maxZoom: 9,
+                maxZoom: 19,
+                minZoom: 1.5,
+                maxNativeZoom: 9,
+                bounds: worldBounds,
                 opacity: 0.8
             }
         );
