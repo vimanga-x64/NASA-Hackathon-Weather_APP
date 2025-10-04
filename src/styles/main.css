@@ -48,9 +48,15 @@ body, html {
 }
 
 .toggle-btn i {
-    width: 18px;
-    height: 18px;
-    transition: transform 0.3s;
+    width: 20px;
+    height: 20px;
+    stroke-width: 1.5;
+    transition: all 0.3s;
+}
+
+.toggle-btn:hover i {
+    stroke-width: 2;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 
 #sidebar {
@@ -135,6 +141,7 @@ body, html {
 .weather-widget.draggable {
     cursor: grab;
     user-select: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .weather-widget.draggable:active {
@@ -142,15 +149,12 @@ body, html {
 }
 
 .weather-widget.draggable:hover {
-    transform: translateY(-4px) scale(1.02);
-    background: rgba(255, 255, 255, 0.9);
-    border-color: rgba(0, 120, 212, 0.3);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 120, 212, 0.2);
 }
 
 .weather-widget.draggable:hover .widget-icon {
-    color: #0078d4;
-    transform: scale(1.1);
+    filter: drop-shadow(0 2px 4px rgba(0, 120, 212, 0.3));
 }
 
 .weather-widget.dragging {
@@ -159,12 +163,11 @@ body, html {
 }
 
 .widget-icon {
-    width: 32px;
-    height: 32px;
-    margin: 0 auto 10px;
-    color: #424242;
-    stroke-width: 1.5;
-    transition: all 0.2s;
+    width: 24px;
+    height: 24px;
+    color: #0078d4;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    stroke-width: 1.5; /* Make icons thinner and more elegant */
 }
 
 .widget-title {
@@ -230,28 +233,29 @@ body, html {
 .active-widget-item {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 10px 12px;
-    background: rgba(0, 120, 212, 0.1);
-    border: 1px solid rgba(0, 120, 212, 0.2);
-    border-radius: 8px;
-    font-size: 13px;
-    animation: slideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    gap: 12px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    border-radius: 10px;
+    margin-bottom: 8px;
     transition: all 0.2s;
+    border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .active-widget-item:hover {
-    background: rgba(0, 120, 212, 0.15);
-    transform: translateX(-2px);
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(0, 120, 212, 0.2);
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0, 120, 212, 0.1);
 }
 
 .active-widget-item .widget-icon {
-    width: 18px;
-    height: 18px;
-    margin: 0;
-    margin-right: 10px;
+    width: 20px;
+    height: 20px;
     color: #0078d4;
-    stroke-width: 2;
+    flex-shrink: 0;
+    stroke-width: 1.5;
 }
 
 .active-widget-info {
@@ -274,19 +278,19 @@ body, html {
 }
 
 .remove-widget-btn {
-    background: rgba(0, 0, 0, 0.05);
-    border: none;
-    color: #616161;
     width: 24px;
     height: 24px;
     border-radius: 6px;
+    border: none;
+    background: rgba(0, 0, 0, 0.05);
+    color: #616161;
+    font-size: 18px;
+    font-weight: 400;
     cursor: pointer;
-    font-size: 16px;
+    transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s;
-    font-weight: 400;
 }
 
 .remove-widget-btn:hover {
@@ -328,7 +332,7 @@ body, html {
     background: rgba(255, 255, 255, 0.95);
 }
 
-/* Scrollbar styling for sidebar - Windows 11 style */
+/* Scrollbar styling for sidebar*/
 #sidebar::-webkit-scrollbar {
     width: 10px;
 }
@@ -360,6 +364,10 @@ body, html {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
 }
 
+.leaflet-control-layers-toggle {
+    background-size: 20px 20px !important;
+}
+
 /* Move zoom controls to bottom right */
 .leaflet-control-zoom {
     border: none !important;
@@ -380,94 +388,428 @@ body, html {
     border: 1px solid rgba(255, 255, 255, 0.4) !important;
     color: #202020 !important;
     font-weight: 600 !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+    font-size: 20px !important;
+    font-weight: 300 !important;
+    transition: all 0.2s !important;
 }
 
 .leaflet-control-zoom a:hover {
     background: rgba(255, 255, 255, 0.9) !important;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    color: #0078d4 !important;
+}
+
+.leaflet-control-zoom a:last-child {
+    border-bottom: none !important;
+}
+
+/* Main Search Bar - Horizontal Top Center */
+#main-search-overlay {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999;
+    pointer-events: none;
+    width: auto;
+    max-width: calc(100vw - 440px);
+}
+
+.main-search-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(60px) saturate(180%);
+    -webkit-backdrop-filter: blur(60px) saturate(180%);
+    border-radius: 14px;
+    padding: 12px 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    pointer-events: auto;
+    animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.main-search-form {
     display: flex;
-    justify-content: space-between;
-    flex-direction: column;
-}
-#sidebar .preferences-button {
-    width: 100%;
-    padding: 12px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: all 0.3s;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
 }
 
-#sidebar .preferences-button:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
-}
-
-.preferences-container {
+.form-group {
     position: relative;
 }
 
-.preferences-content {
-    display: none;
-    position: absolute;
-    background: rgba(40, 40, 70, 0.8); /* Darker translucent background */
-    backdrop-filter: blur(5px);
-    min-width: 220px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1001; /* Ensure it's above other elements */
-    color: white;
-    border-radius: 8px;
-    padding: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    bottom: 100%; /* Position it above the button */
-    margin-bottom: 10px;
+.location-group {
+    min-width: 280px;
 }
 
-.preferences-content.show {
+#main-location-input,
+.date-input,
+.time-input {
+    padding: 10px 14px;
+    border: 1.5px solid rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    font-size: 13px;
+    font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: #202020;
+    transition: all 0.2s;
+    outline: none;
+    height: 40px;
+}
+
+#main-location-input {
+    width: 100%;
+}
+
+#main-location-input:focus,
+.date-input:focus,
+.time-input:focus {
+    border-color: #0078d4;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.1);
+}
+
+#main-location-input::placeholder {
+    color: #999;
+}
+
+.date-input,
+.time-input {
+    min-width: 140px;
+}
+
+/* Dropdown Styles */
+.dropdown-wrapper {
+    position: relative;
+}
+
+.dropdown-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border: 1.5px solid rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    font-size: 13px;
+    font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: #202020;
+    cursor: pointer;
+    transition: all 0.2s;
+    outline: none;
+    height: 40px;
+    white-space: nowrap;
+}
+
+.dropdown-btn:hover {
+    border-color: #0078d4;
+    background: rgba(255, 255, 255, 1);
+}
+
+.dropdown-btn i {
+    width: 18px;
+    height: 18px;
+    color: #0078d4;
+    stroke-width: 1.5;
+}
+
+.dropdown-btn .chevron {
+    width: 16px;
+    height: 16px;
+    color: #616161;
+    transition: transform 0.2s;
+    stroke-width: 2;
+}
+
+.dropdown-btn.active .chevron {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 220px;
+    max-height: 320px;
+    overflow-y: auto;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(40px);
+    border: 1.5px solid rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    display: none;
+    z-index: 1001;
+    animation: dropdownSlide 0.2s ease-out;
+}
+
+@keyframes dropdownSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdown-menu.show {
     display: block;
 }
 
-.preference-item {
-    padding: 12px;
-    border: 2px solid transparent; /* Use transparent border to prevent layout shift on check */
-    background: transparent;
-    color: white;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: all 0.3s;
+.dropdown-header {
+    padding: 12px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #616161;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.dropdown-checkbox-label {
     display: flex;
     align-items: center;
-    user-select: none; /* Prevent text selection on click */
+    gap: 10px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    user-select: none;
 }
 
-/* Add hover effect */
-.preference-item:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
+.dropdown-checkbox-label:last-child {
+    border-bottom: none;
 }
 
-/* Style for selected/checked items (similar to .activity-btn.active) */
-.preference-item.checked {
-    background: rgba(255, 255, 255, 0.3);
-    border-color: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.dropdown-checkbox-label:hover {
+    background: linear-gradient(90deg, rgba(0, 120, 212, 0.08) 0%, transparent 100%);
 }
 
-/* Hide the actual checkbox for a cleaner UI */
-.preference-item input[type="checkbox"] {
+.dropdown-checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #0078d4;
+    flex-shrink: 0;
+}
+
+.dropdown-checkbox-label span {
+    font-size: 13px;
+    color: #202020;
+    font-weight: 500;
+    user-select: none;
+}
+
+.dropdown-checkbox-label input[type="checkbox"]:checked ~ span {
+    color: #0078d4;
+    font-weight: 600;
+}
+
+input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+}
+
+input[type="checkbox"]:checked {
+    background: #0078d4;
+    border-color: #0078d4;
+}
+
+input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 1px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+input[type="checkbox"]:hover {
+    border-color: #0078d4;
+    box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.1);
+}
+
+/* Predict Button */
+.predict-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #0078d4 0%, #106ebe 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 120, 212, 0.3);
+    height: 40px;
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+}
+
+.predict-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.predict-btn:hover::before {
+    left: 100%;
+}
+
+.predict-btn:hover {
+    background: linear-gradient(135deg, #106ebe 0%, #005a9e 100%);
+}
+
+/* Search Results */
+.main-search-results {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    max-height: 250px;
+    overflow-y: auto;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(40px);
+    display: none;
+    z-index: 1000;
+}
+
+.main-search-results.show {
+    display: block;
+    border: 1.5px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.main-search-result-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.main-search-result-item:last-child {
+    border-bottom: none;
+}
+
+.main-search-result-item:hover {
+    background: rgba(0, 120, 212, 0.1);
+}
+
+.main-search-result-item i {
+    width: 16px;
+    height: 16px;
+    color: #0078d4;
+    flex-shrink: 0;
+    stroke-width: 1.5;
+}
+
+.main-search-result-text {
+    flex: 1;
+}
+
+.main-search-result-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #202020;
+    margin-bottom: 2px;
+}
+
+.main-search-result-address {
+    font-size: 11px;
+    color: #616161;
+}
+
+.main-search-results::-webkit-scrollbar {
+    width: 8px;
+}
+
+.main-search-results::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.main-search-results::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+}
+
+/* Hide overlay option */
+#main-search-overlay.hidden {
     display: none;
 }
 
-/* Make the label take up the available space */
-.preference-item label {
-    cursor: pointer;
-    flex-grow: 1;
+/* When sidebar is collapsed, adjust search bar position */
+#sidebar.collapsed ~ #map-container #main-search-overlay {
+    max-width: calc(100vw - 80px);
 }
 
-.preferences-heading {
-    text-align: center;
+/* Make responsive on smaller screens */
+@media (max-width: 1400px) {
+    #main-search-overlay {
+        max-width: calc(100vw - 40px);
+    }
+    
+    .main-search-form {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-search-container {
+        padding: 10px 12px;
+    }
+
+    .main-search-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .location-group {
+        min-width: auto;
+    }
+    
+    .date-input,
+    .time-input {
+        min-width: auto;
+        width: 100%;
+    }
+}
+
+svg {
+    shape-rendering: geometricPrecision;
 }

@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weather Forecast with NASA Maps</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <!-- Add Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
@@ -19,23 +18,6 @@
                 <div class="sidebar-header">
                     <h2>Weather Widgets</h2>
                     <p class="instruction">Drag widgets onto the map</p>
-                </div>
-
-                <!-- Search Bar -->
-                <div class="search-container">
-                    <div class="search-input-wrapper">
-                        <i data-lucide="search" class="search-icon"></i>
-                        <input 
-                            type="text" 
-                            id="location-search" 
-                            placeholder="Search for a location..."
-                            autocomplete="off"
-                        />
-                        <button id="clear-search" class="clear-btn" style="display: none;">
-                            <i data-lucide="x"></i>
-                        </button>
-                    </div>
-                    <div id="search-results" class="search-results"></div>
                 </div>
 
                 <div id="widgets-container">
@@ -79,16 +61,96 @@
                         <div class="widget-title">UV Index</div>
                     </div>
                 </div>
-
-                <!--Its 2025 for gods sake time to dynamically render stuff -->
-                <div id="preferences">
-
-                </div>
             </div>
         </aside>
         
         <main id="map-container">
             <div id="map"></div>
+            
+            <!-- Horizontal Search Bar -->
+            <div id="main-search-overlay">
+                <div class="main-search-container">
+                    <div class="main-search-form">
+                        <!-- Location Input -->
+                        <div class="form-group location-group">
+                            <input 
+                                type="text" 
+                                id="main-location-input" 
+                                placeholder="🔍 Search location..."
+                                autocomplete="off"
+                            />
+                            <div id="main-search-results" class="main-search-results"></div>
+                        </div>
+
+                        <!-- Date Picker -->
+                        <input 
+                            type="date" 
+                            id="date-picker" 
+                            class="date-input"
+                            title="Select date"
+                        />
+
+                        <!-- Time Picker -->
+                        <input 
+                            type="time" 
+                            id="time-picker" 
+                            class="time-input"
+                            title="Select time"
+                        />
+
+                        <!-- Activity Preferences Dropdown -->
+                        <div class="dropdown-wrapper">
+                            <button class="dropdown-btn" id="activities-dropdown-btn">
+                                <i data-lucide="activity"></i>
+                                <span id="selected-count">Activities (0)</span>
+                                <i data-lucide="chevron-down" class="chevron"></i>
+                            </button>
+                            <div class="dropdown-menu" id="activities-dropdown">
+                                <div class="dropdown-header">Select Activities</div>
+                                <label class="dropdown-checkbox-label">
+                                    <input type="checkbox" value="hiking" />
+                                    <span>🥾 Hiking</span>
+                                </label>
+                                <label class="dropdown-checkbox-label">
+                                    <input type="checkbox" value="skiing" />
+                                    <span>⛷️ Skiing</span>
+                                </label>
+                                <label class="dropdown-checkbox-label">
+                                    <input type="checkbox" value="camping" />
+                                    <span>⛺ Camping</span>
+                                </label>
+                                <label class="dropdown-checkbox-label">
+                                    <input type="checkbox" value="cycling" />
+                                    <span>🚴 Cycling</span>
+                                </label>
+                                <label class="dropdown-checkbox-label">
+                                    <input type="checkbox" value="fishing" />
+                                    <span>🎣 Fishing</span>
+                                </label>
+                                <label class="dropdown-checkbox-label">
+                                    <input type="checkbox" value="kayaking" />
+                                    <span>🛶 Kayaking</span>
+                                </label>
+                                <label class="dropdown-checkbox-label">
+                                    <input type="checkbox" value="surfing" />
+                                    <span>🏄 Surfing</span>
+                                </label>
+                                <label class="dropdown-checkbox-label">
+                                    <input type="checkbox" value="running" />
+                                    <span>🏃 Running</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Predict Button -->
+                        <button class="predict-btn" id="predict-btn">
+                            <i data-lucide="sparkles"></i>
+                            Predict
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div id="active-widgets">
                 <h4>Active Layers</h4>
                 <div id="active-widgets-list">

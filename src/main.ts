@@ -1,7 +1,6 @@
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './styles/main.css';
-import { Preferences } from './components/Preferences';
 
 // Fix marker icon paths to use CDN
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -18,25 +17,281 @@ interface WeatherWidget {
     layer?: L.TileLayer;
 }
 
+interface SearchResult {
+    display_name: string;
+    lat: string;
+    lon: string;
+    name: string;
+    type: string;
+}
+
 class WeatherForecastApp {
     private map!: L.Map;
     private activeWidgets: Map<string, WeatherWidget> = new Map();
     private draggedWidgetType: string | null = null;
+    private searchMarker: L.Marker | null = null;
+    private searchTimeout: number | null = null;
+    private selectedLocation: { lat: number; lon: number; name: string } | null = null;
+    private selectedActivities: string[] = [];
+    private storageKey = 'user-activity-preferences';
 
     constructor() {
         console.log('App initialized');
         this.initMap();
         this.initDragAndDrop();
         this.initSidebarToggle();
+        this.initMainSearch();
+        this.initDateTimePickers();
+        this.initActivityDropdown();
+        this.initPredictButton();
         this.initLucideIcons();
-        new Preferences('preferences');
     }
 
     private initLucideIcons(): void {
-        // Initialize Lucide icons
         if (typeof (window as any).lucide !== 'undefined') {
-            (window as any).lucide.createIcons();
+            (window as any).lucide.createIcons({
+                attrs: {
+                    'stroke-width': '1.5',
+                    'stroke-linecap': 'round',
+                    'stroke-linejoin': 'round'
+                }
+            });
+            
+            // Apply stroke-width to specific icon types for better visuals
+            document.querySelectorAll('.predict-btn i, .dropdown-btn .chevron').forEach(icon => {
+                icon.setAttribute('stroke-width', '2');
+            });
         }
+    }
+
+    private initActivityDropdown(): void {
+        const dropdownBtn = document.getElementById('activities-dropdown-btn');
+        const dropdownMenu = document.getElementById('activities-dropdown');
+        const selectedCountSpan = document.getElementById('selected-count');
+        
+        if (!dropdownBtn || !dropdownMenu || !selectedCountSpan) return;
+
+        // Load saved preferences
+        this.loadActivityPreferences();
+
+        // Toggle dropdown
+        dropdownBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle('show');
+            dropdownBtn.classList.toggle('active');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!dropdownMenu.contains(e.target as Node) && e.target !== dropdownBtn) {
+                dropdownMenu.classList.remove('show');
+                dropdownBtn.classList.remove('active');
+            }
+        });
+
+        // Handle checkbox changes
+        const checkboxes = dropdownMenu.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+            const input = checkbox as HTMLInputElement;
+            
+            // Set initial checked state
+            if (this.selectedActivities.includes(input.value)) {
+                input.checked = true;
+            }
+
+            input.addEventListener('change', () => {
+                if (input.checked) {
+                    if (!this.selectedActivities.includes(input.value)) {
+                        this.selectedActivities.push(input.value);
+                    }
+                } else {
+                    this.selectedActivities = this.selectedActivities.filter(
+                        activity => activity !== input.value
+                    );
+                }
+
+                this.saveActivityPreferences();
+                this.updateSelectedCount();
+                console.log('Selected Activities:', this.selectedActivities);
+            });
+        });
+
+        this.updateSelectedCount();
+    }
+
+    private updateSelectedCount(): void {
+        const selectedCountSpan = document.getElementById('selected-count');
+        if (selectedCountSpan) {
+            const count = this.selectedActivities.length;
+            selectedCountSpan.textContent = `Activities (${count})`;
+        }
+    }
+
+    private initPredictButton(): void {
+        const predictBtn = document.getElementById('predict-btn');
+        
+        if (!predictBtn) return;
+
+        predictBtn.addEventListener('click', () => {
+            console.log('Predict button clicked!');
+            console.log('Selected Location:', this.selectedLocation);
+            console.log('Selected Activities:', this.selectedActivities);
+            
+            const datePicker = document.getElementById('date-picker') as HTMLInputElement;
+            const timePicker = document.getElementById('time-picker') as HTMLInputElement;
+            
+            console.log('Date:', datePicker?.value);
+            console.log('Time:', timePicker?.value);
+            
+            // You can add your predict functionality here later
+        });
+    }
+
+    private saveActivityPreferences(): void {
+        localStorage.setItem(this.storageKey, JSON.stringify(this.selectedActivities));
+    }
+
+    private loadActivityPreferences(): void {
+        const savedPreferences = localStorage.getItem(this.storageKey);
+        if (savedPreferences) {
+            this.selectedActivities = JSON.parse(savedPreferences);
+        }
+    }
+
+    public getSelectedActivities(): string[] {
+        return this.selectedActivities;
+    }
+
+    private initDateTimePickers(): void {
+        const datePicker = document.getElementById('date-picker') as HTMLInputElement;
+        const timePicker = document.getElementById('time-picker') as HTMLInputElement;
+
+        if (datePicker) {
+            const today = new Date().toISOString().split('T')[0];
+            datePicker.value = today;
+            datePicker.min = today;
+        }
+
+        if (timePicker) {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            timePicker.value = `${hours}:${minutes}`;
+        }
+    }
+
+    private initMainSearch(): void {
+        const mainSearchInput = document.getElementById('main-location-input') as HTMLInputElement;
+        const mainSearchResults = document.getElementById('main-search-results');
+
+        if (!mainSearchInput || !mainSearchResults) return;
+
+        mainSearchInput.addEventListener('input', (e) => {
+            const query = (e.target as HTMLInputElement).value.trim();
+
+            if (query.length < 3) {
+                mainSearchResults.classList.remove('show');
+                return;
+            }
+
+            if (this.searchTimeout) {
+                clearTimeout(this.searchTimeout);
+            }
+
+            this.searchTimeout = window.setTimeout(() => {
+                this.performMainSearch(query);
+            }, 500);
+        });
+
+        mainSearchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const query = mainSearchInput.value.trim();
+                if (query.length >= 3) {
+                    if (this.searchTimeout) {
+                        clearTimeout(this.searchTimeout);
+                    }
+                    this.performMainSearch(query);
+                }
+            }
+        });
+    }
+
+    private async performMainSearch(query: string): Promise<void> {
+        const mainSearchResults = document.getElementById('main-search-results');
+        if (!mainSearchResults) return;
+
+        mainSearchResults.classList.add('show');
+        mainSearchResults.innerHTML = '<div style="padding: 16px; text-align: center; color: #616161; font-size: 13px;">Searching...</div>';
+
+        try {
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`
+            );
+
+            if (!response.ok) {
+                throw new Error('Search failed');
+            }
+
+            const results: SearchResult[] = await response.json();
+
+            if (results.length === 0) {
+                mainSearchResults.innerHTML = '<div style="padding: 16px; text-align: center; color: #616161; font-size: 13px;">No locations found</div>';
+                return;
+            }
+
+            mainSearchResults.innerHTML = '';
+            results.forEach(result => {
+                const item = document.createElement('div');
+                item.className = 'main-search-result-item';
+                item.innerHTML = `
+                    <i data-lucide="map-pin"></i>
+                    <div class="main-search-result-text">
+                        <div class="main-search-result-name">${result.name || 'Unknown'}</div>
+                        <div class="main-search-result-address">${result.display_name}</div>
+                    </div>
+                `;
+
+                item.addEventListener('click', () => {
+                    this.selectMainLocation(parseFloat(result.lat), parseFloat(result.lon), result.display_name);
+                });
+
+                mainSearchResults.appendChild(item);
+            });
+
+            if (typeof (window as any).lucide !== 'undefined') {
+                (window as any).lucide.createIcons();
+            }
+
+        } catch (error) {
+            console.error('Search error:', error);
+            mainSearchResults.innerHTML = '<div style="padding: 16px; text-align: center; color: #616161; font-size: 13px;">Search failed. Please try again.</div>';
+        }
+    }
+
+    private selectMainLocation(lat: number, lon: number, name: string): void {
+        this.selectedLocation = { lat, lon, name };
+        
+        const mainSearchInput = document.getElementById('main-location-input') as HTMLInputElement;
+        const mainSearchResults = document.getElementById('main-search-results');
+
+        if (mainSearchInput) {
+            mainSearchInput.value = name;
+        }
+
+        if (mainSearchResults) {
+            mainSearchResults.classList.remove('show');
+        }
+
+        if (this.searchMarker) {
+            this.map.removeLayer(this.searchMarker);
+        }
+
+        this.searchMarker = L.marker([lat, lon])
+            .addTo(this.map)
+            .bindPopup(`<strong>${name}</strong><br>Lat: ${lat.toFixed(4)}<br>Lon: ${lon.toFixed(4)}`)
+            .openPopup();
+
+        this.map.flyTo([lat, lon], 10, { duration: 1.5 });
     }
 
     private initSidebarToggle(): void {
@@ -45,20 +300,16 @@ class WeatherForecastApp {
 
         toggleBtn?.addEventListener('click', () => {
             const isCollapsed = sidebar?.classList.contains('collapsed');
-
+            
             sidebar?.classList.toggle('collapsed');
             sidebar?.classList.toggle('expanded');
-
-            // Update button position based on sidebar state
+            
             if (isCollapsed) {
-                // Expanding - move button back to sidebar edge
                 toggleBtn.style.left = '364px';
             } else {
-                // Collapsing - move button to left edge
                 toggleBtn.style.left = '20px';
             }
-
-            // Give the sidebar time to animate, then resize the map
+            
             setTimeout(() => {
                 this.map.invalidateSize();
             }, 300);
@@ -67,53 +318,36 @@ class WeatherForecastApp {
 
     private initMap(): void {
         console.log('Initializing map...');
-        const worldBounds =  L.latLngBounds(L.latLng(-90, -Infinity), L.latLng(90, Infinity));
-
-        // Initialize map centered on NYC with zoom controls in bottom right
+        
         this.map = L.map('map', {
-            zoomControl: false,
-            worldCopyJump: true,
-
-            maxBounds: worldBounds,
-
-            maxBoundsViscosity: 1.0,// Disable default zoom control
+            zoomControl: false
         }).setView([40.7128, -74.0060], 5);
-
-        // Add zoom control to bottom right
+        
         L.control.zoom({
             position: 'bottomright'
         }).addTo(this.map);
         
         console.log('Map created');
 
-        // OpenStreetMap base layer
         const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
-            minZoom: 1.5,
-            bounds: worldBounds,
             attribution: '© OpenStreetMap contributors'
         });
 
-        // NASA Blue Marble layer
         const nasaBlueMarble = L.tileLayer(
             'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpeg',
             {
                 attribution: 'NASA GIBS',
                 maxZoom: 8,
-                minZoom: 1.5,
-                bounds: worldBounds,
                 opacity: 0.7
             }
         );
 
-        // NASA MODIS True Color (recent imagery)
         const nasaModis = L.tileLayer(
             `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/${this.getYesterdayDate()}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`,
             {
                 attribution: 'NASA EOSDIS GIBS',
                 maxZoom: 9,
-                minZoom: 1.5,
-                bounds: worldBounds,
                 opacity: 0.8
             }
         );
@@ -127,33 +361,28 @@ class WeatherForecastApp {
             "NASA MODIS (Recent)": nasaModis
         };
 
-        // Add layer control to switch between maps (top right)
         L.control.layers(baseMaps, overlayMaps, {
             position: 'topright'
         }).addTo(this.map);
 
-        // Add default layers
         osm.addTo(this.map);
         nasaBlueMarble.addTo(this.map);
         
         console.log('Layers added');
 
-        // Add click event to place markers with weather info
         this.map.on('click', async (e) => {
             const weatherInfo = await this.getWeatherAtLocation(e.latlng.lat, e.latlng.lng);
-
+            
             L.marker([e.latlng.lat, e.latlng.lng])
                 .addTo(this.map)
                 .bindPopup(weatherInfo)
                 .openPopup();
         });
 
-        // Ensure map resizes properly on window resize
         window.addEventListener('resize', () => {
             this.map.invalidateSize();
         });
 
-        // Force initial resize after a short delay
         setTimeout(() => {
             this.map.invalidateSize();
         }, 100);
@@ -199,7 +428,6 @@ class WeatherForecastApp {
     }
 
     private addWeatherLayer(type: string): void {
-        // Prevent duplicate widgets
         if (this.activeWidgets.has(type)) {
             alert(`${this.getWidgetName(type)} is already active!`);
             return;
@@ -211,7 +439,6 @@ class WeatherForecastApp {
             icon: this.getWidgetIcon(type)
         };
 
-        // Add OpenWeatherMap layer for the widget type
         const layerUrl = this.getWeatherLayerUrl(type);
         if (layerUrl) {
             widget.layer = L.tileLayer(layerUrl, {
@@ -265,17 +492,15 @@ class WeatherForecastApp {
             listContainer.appendChild(item);
         });
 
-        // Re-initialize Lucide icons for dynamically added elements
         if (typeof (window as any).lucide !== 'undefined') {
             (window as any).lucide.createIcons();
         }
     }
 
     private getWeatherLayerUrl(type: string): string {
-        // Note: Replace 'YOUR_API_KEY' with actual OpenWeatherMap API key for live data
         const baseUrl = 'https://tile.openweathermap.org/map';
-        const apiKey = 'YOUR_API_KEY'; // Add your key here later
-
+        const apiKey = 'YOUR_API_KEY';
+        
         const layerMap: { [key: string]: string } = {
             'temperature': `${baseUrl}/temp_new/{z}/{x}/{y}.png?appid=${apiKey}`,
             'precipitation': `${baseUrl}/precipitation_new/{z}/{x}/{y}.png?appid=${apiKey}`,
@@ -316,7 +541,6 @@ class WeatherForecastApp {
     }
 
     private async getWeatherAtLocation(lat: number, lon: number): Promise<string> {
-        // Mock weather data - replace with real API call later
         return `
             <strong>Location</strong><br>
             Lat: ${lat.toFixed(4)}<br>
@@ -333,6 +557,5 @@ class WeatherForecastApp {
     }
 }
 
-// Initialize the app
 console.log('Starting app...');
 new WeatherForecastApp();
