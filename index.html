@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weather Forecast with NASA Maps</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Add Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
     <div id="app">
@@ -17,6 +19,23 @@
                 <div class="sidebar-header">
                     <h2>Weather Widgets</h2>
                     <p class="instruction">Drag widgets onto the map</p>
+                </div>
+
+                <!-- Search Bar -->
+                <div class="search-container">
+                    <div class="search-input-wrapper">
+                        <i data-lucide="search" class="search-icon"></i>
+                        <input 
+                            type="text" 
+                            id="location-search" 
+                            placeholder="Search for a location..."
+                            autocomplete="off"
+                        />
+                        <button id="clear-search" class="clear-btn" style="display: none;">
+                            <i data-lucide="x"></i>
+                        </button>
+                    </div>
+                    <div id="search-results" class="search-results"></div>
                 </div>
 
                 <div id="widgets-container">
@@ -65,6 +84,7 @@
                 <div id="preferences">
 
                 </div>
+            </div>
         </aside>
         
         <main id="map-container">
