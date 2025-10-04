@@ -1,6 +1,10 @@
 import type { WeatherData, ActivityRecommendation } from '../types';
 
 export class ActivityService {
+    getAvailableActivities(): string[] {
+        return ['hiking', 'skiing', 'camping', 'cycling'];
+    }
+
     evaluateActivity(activity: string, weather: WeatherData): ActivityRecommendation {
         switch (activity) {
             case 'hiking':

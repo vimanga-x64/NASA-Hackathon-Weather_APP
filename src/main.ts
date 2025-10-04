@@ -1,6 +1,7 @@
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './styles/main.css';
+import { Preferences } from './components/Preferences';
 
 // Fix marker icon paths to use CDN
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -16,6 +17,7 @@ class WeatherForecastApp {
     constructor() {
         console.log('App initialized');
         this.initMap();
+        new Preferences('preferences');
     }
 
     private initMap(): void {
