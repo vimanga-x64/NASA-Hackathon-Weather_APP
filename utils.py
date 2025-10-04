@@ -55,7 +55,7 @@ Input JSON:
 
 Output STRICTLY as JSON with these keys:
 {{
-  "rating": "GO|CAUTION|NO-GO", // only one rating for all activities
+  "rating": "IDEAL|EXERCISE CAUTION|NOT IDEAL", // only one rating for all activities
   "why": ["<=12 words", "<=12 words"],  // one for each activity
   "alternatives": ["<=3 words", "<=3 words"],
   "one_liner": "<=22 words summary in English"
