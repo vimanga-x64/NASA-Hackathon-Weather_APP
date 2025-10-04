@@ -1,6 +1,7 @@
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './styles/main.css';
+import { Preferences } from './components/Preferences';
 
 // Fix marker icon paths to use CDN
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -28,6 +29,7 @@ class WeatherForecastApp {
         this.initDragAndDrop();
         this.initSidebarToggle();
         this.initLucideIcons();
+        new Preferences('preferences');
     }
 
     private initLucideIcons(): void {
@@ -43,10 +45,10 @@ class WeatherForecastApp {
 
         toggleBtn?.addEventListener('click', () => {
             const isCollapsed = sidebar?.classList.contains('collapsed');
-            
+
             sidebar?.classList.toggle('collapsed');
             sidebar?.classList.toggle('expanded');
-            
+
             // Update button position based on sidebar state
             if (isCollapsed) {
                 // Expanding - move button back to sidebar edge
@@ -55,7 +57,7 @@ class WeatherForecastApp {
                 // Collapsing - move button to left edge
                 toggleBtn.style.left = '20px';
             }
-            
+
             // Give the sidebar time to animate, then resize the map
             setTimeout(() => {
                 this.map.invalidateSize();
@@ -65,12 +67,18 @@ class WeatherForecastApp {
 
     private initMap(): void {
         console.log('Initializing map...');
-        
+        const worldBounds =  L.latLngBounds(L.latLng(-90, -Infinity), L.latLng(90, Infinity));
+
         // Initialize map centered on NYC with zoom controls in bottom right
         this.map = L.map('map', {
-            zoomControl: false // Disable default zoom control
+            zoomControl: false,
+            worldCopyJump: true,
+
+            maxBounds: worldBounds,
+
+            maxBoundsViscosity: 1.0,// Disable default zoom control
         }).setView([40.7128, -74.0060], 5);
-        
+
         // Add zoom control to bottom right
         L.control.zoom({
             position: 'bottomright'
@@ -81,6 +89,8 @@ class WeatherForecastApp {
         // OpenStreetMap base layer
         const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
+            minZoom: 1.5,
+            bounds: worldBounds,
             attribution: '© OpenStreetMap contributors'
         });
 
@@ -90,6 +100,8 @@ class WeatherForecastApp {
             {
                 attribution: 'NASA GIBS',
                 maxZoom: 8,
+                minZoom: 1.5,
+                bounds: worldBounds,
                 opacity: 0.7
             }
         );
@@ -100,6 +112,8 @@ class WeatherForecastApp {
             {
                 attribution: 'NASA EOSDIS GIBS',
                 maxZoom: 9,
+                minZoom: 1.5,
+                bounds: worldBounds,
                 opacity: 0.8
             }
         );
@@ -127,7 +141,7 @@ class WeatherForecastApp {
         // Add click event to place markers with weather info
         this.map.on('click', async (e) => {
             const weatherInfo = await this.getWeatherAtLocation(e.latlng.lat, e.latlng.lng);
-            
+
             L.marker([e.latlng.lat, e.latlng.lng])
                 .addTo(this.map)
                 .bindPopup(weatherInfo)
@@ -261,7 +275,7 @@ class WeatherForecastApp {
         // Note: Replace 'YOUR_API_KEY' with actual OpenWeatherMap API key for live data
         const baseUrl = 'https://tile.openweathermap.org/map';
         const apiKey = 'YOUR_API_KEY'; // Add your key here later
-        
+
         const layerMap: { [key: string]: string } = {
             'temperature': `${baseUrl}/temp_new/{z}/{x}/{y}.png?appid=${apiKey}`,
             'precipitation': `${baseUrl}/precipitation_new/{z}/{x}/{y}.png?appid=${apiKey}`,

@@ -5,65 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weather Forecast with NASA Maps</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <!-- Add Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
     <div id="app">
-        <!-- Move toggle button outside sidebar -->
         <button id="toggle-sidebar" class="toggle-btn">
             <i data-lucide="panel-left-close"></i>
         </button>
-        
-        <aside id="sidebar" class="expanded">
+
+        <aside id="sidebar">
             <div class="sidebar-content">
                 <div class="sidebar-header">
                     <h2>Weather Widgets</h2>
                     <p class="instruction">Drag widgets onto the map</p>
                 </div>
-                
+
                 <div id="widgets-container">
                     <div class="weather-widget draggable" draggable="true" data-type="temperature">
                         <i data-lucide="thermometer" class="widget-icon"></i>
                         <div class="widget-title">Temperature</div>
                     </div>
-                    
+
                     <div class="weather-widget draggable" draggable="true" data-type="precipitation">
                         <i data-lucide="cloud-rain" class="widget-icon"></i>
                         <div class="widget-title">Precipitation</div>
                     </div>
-                    
+
                     <div class="weather-widget draggable" draggable="true" data-type="wind">
                         <i data-lucide="wind" class="widget-icon"></i>
                         <div class="widget-title">Wind Speed</div>
                     </div>
-                    
+
                     <div class="weather-widget draggable" draggable="true" data-type="humidity">
                         <i data-lucide="droplets" class="widget-icon"></i>
                         <div class="widget-title">Humidity</div>
                     </div>
-                    
+
                     <div class="weather-widget draggable" draggable="true" data-type="clouds">
                         <i data-lucide="cloud" class="widget-icon"></i>
                         <div class="widget-title">Cloud Cover</div>
                     </div>
-                    
+
                     <div class="weather-widget draggable" draggable="true" data-type="visibility">
                         <i data-lucide="eye" class="widget-icon"></i>
                         <div class="widget-title">Visibility</div>
                     </div>
-                    
+
                     <div class="weather-widget draggable" draggable="true" data-type="pressure">
                         <i data-lucide="gauge" class="widget-icon"></i>
                         <div class="widget-title">Pressure</div>
                     </div>
-                    
+
                     <div class="weather-widget draggable" draggable="true" data-type="uvindex">
                         <i data-lucide="sun" class="widget-icon"></i>
                         <div class="widget-title">UV Index</div>
                     </div>
                 </div>
-            </div>
+
+                <!--Its 2025 for gods sake time to dynamically render stuff -->
+                <div id="preferences">
+
+                </div>
         </aside>
         
         <main id="map-container">
