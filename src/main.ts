@@ -1,7 +1,6 @@
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './styles/main.css';
-import {GeoSearchControl, OpenStreetMapProvider} from "leaflet-geosearch";
 
 // Fix marker icon paths to use CDN
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -347,21 +346,6 @@ class WeatherForecastApp {
             bounds: worldBounds,
             attribution: '© OpenStreetMap contributors'
         });
-
-        const provider = new OpenStreetMapProvider();
-        const searchControl = new GeoSearchControl({
-            provider: provider,
-            style: 'bar',
-            showMarker: true,
-            showPopup: false,
-            autoClose: true,
-            retainZoomLevel: false,
-            animateZoom: true,
-            keepResult: true,
-            searchLabel: 'Enter address',
-        });
-
-        this.map.addControl(searchControl)
 
         // NASA Blue Marble layer
         const nasaBlueMarble = L.tileLayer(
