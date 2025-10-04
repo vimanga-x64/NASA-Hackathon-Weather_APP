@@ -25,6 +25,31 @@ interface SearchResult {
     type: string;
 }
 
+interface RecommendationResponse {
+    location: {
+        latitude: number;
+        longitude: number;
+    };
+    date: string;
+    weather: {
+        temp: number;
+        precipitation: number;
+        wind: number;
+        cloud_cover: number;
+        humidity?: number;
+        description?: string;
+        location_name?: string;
+    };
+    recommendation: {
+        rating: string;
+        one_liner: string;
+        why: string[];
+        alternatives: string[];
+        icon?: string;  // Add this
+        icon_name?: string;  // Add this
+    };
+}
+
 class WeatherForecastApp {
     private map!: L.Map;
     private activeWidgets: Map<string, WeatherWidget> = new Map();
@@ -34,6 +59,7 @@ class WeatherForecastApp {
     private selectedLocation: { lat: number; lon: number; name: string } | null = null;
     private selectedActivities: string[] = [];
     private storageKey = 'user-activity-preferences';
+    private apiBaseUrl = 'http://localhost:5000'; // Change this to your Flask server URL
 
     constructor() {
         console.log('App initialized');
@@ -57,7 +83,6 @@ class WeatherForecastApp {
                 }
             });
             
-            // Apply stroke-width to specific icon types for better visuals
             document.querySelectorAll('.predict-btn i, .dropdown-btn .chevron').forEach(icon => {
                 icon.setAttribute('stroke-width', '2');
             });
@@ -71,17 +96,14 @@ class WeatherForecastApp {
         
         if (!dropdownBtn || !dropdownMenu || !selectedCountSpan) return;
 
-        // Load saved preferences
         this.loadActivityPreferences();
 
-        // Toggle dropdown
         dropdownBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             dropdownMenu.classList.toggle('show');
             dropdownBtn.classList.toggle('active');
         });
 
-        // Close dropdown when clicking outside
         document.addEventListener('click', (e) => {
             if (!dropdownMenu.contains(e.target as Node) && e.target !== dropdownBtn) {
                 dropdownMenu.classList.remove('show');
@@ -89,12 +111,10 @@ class WeatherForecastApp {
             }
         });
 
-        // Handle checkbox changes
         const checkboxes = dropdownMenu.querySelectorAll('input[type="checkbox"]');
         checkboxes.forEach(checkbox => {
             const input = checkbox as HTMLInputElement;
             
-            // Set initial checked state
             if (this.selectedActivities.includes(input.value)) {
                 input.checked = true;
             }
@@ -132,19 +152,230 @@ class WeatherForecastApp {
         
         if (!predictBtn) return;
 
-        predictBtn.addEventListener('click', () => {
-            console.log('Predict button clicked!');
-            console.log('Selected Location:', this.selectedLocation);
-            console.log('Selected Activities:', this.selectedActivities);
-            
-            const datePicker = document.getElementById('date-picker') as HTMLInputElement;
-            const timePicker = document.getElementById('time-picker') as HTMLInputElement;
-            
-            console.log('Date:', datePicker?.value);
-            console.log('Time:', timePicker?.value);
-            
-            // You can add your predict functionality here later
+        predictBtn.addEventListener('click', async () => {
+            await this.makeRecommendation();
         });
+    }
+
+    private async makeRecommendation(): Promise<void> {
+        const predictBtn = document.getElementById('predict-btn');
+        
+        // Validate inputs
+        if (!this.selectedLocation) {
+            alert('Please select a location first!');
+            return;
+        }
+
+        if (this.selectedActivities.length === 0) {
+            alert('Please select at least one activity!');
+            return;
+        }
+
+        const datePicker = document.getElementById('date-picker') as HTMLInputElement;
+        const timePicker = document.getElementById('time-picker') as HTMLInputElement;
+
+        if (!datePicker?.value) {
+            alert('Please select a date!');
+            return;
+        }
+
+        // Show loading state
+        if (predictBtn) {
+            predictBtn.innerHTML = '<i data-lucide="loader"></i> Predicting...';
+            predictBtn.setAttribute('disabled', 'true');
+            this.initLucideIcons();
+        }
+
+        try {
+            const requestData = {
+                location: {
+                    latitude: this.selectedLocation.lat,
+                    longitude: this.selectedLocation.lon
+                },
+                date: datePicker.value,
+                preferences: this.selectedActivities
+            };
+
+            console.log('Sending request:', requestData);
+
+            const response = await fetch(`${this.apiBaseUrl}/recommend`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            if (!response.ok) {
+                throw new Error(`API request failed: ${response.statusText}`);
+            }
+
+            const data: RecommendationResponse = await response.json();
+            console.log('Recommendation received:', data);
+
+            this.displayRecommendation(data);
+
+        } catch (error) {
+            console.error('Prediction error:', error);
+            alert('Failed to get recommendation. Please make sure the Flask server is running on http://localhost:5000');
+        } finally {
+            // Reset button
+            if (predictBtn) {
+                predictBtn.innerHTML = '<i data-lucide="sparkles"></i> Predict';
+                predictBtn.removeAttribute('disabled');
+                this.initLucideIcons();
+            }
+        }
+    }
+
+    private displayRecommendation(data: RecommendationResponse): void {
+        console.log('displayRecommendation called with data:', data);
+        
+        const recommendationPanel = document.getElementById('weather-recommendation-panel');
+        console.log('Recommendation panel element:', recommendationPanel);
+        
+        if (!recommendationPanel) {
+            console.error('Recommendation panel not found in DOM!');
+            alert('Error: Recommendation panel not found. Please check HTML.');
+            return;
+        }
+
+        // Clear existing recommendation
+        recommendationPanel.innerHTML = '';
+        console.log('Panel cleared, creating recommendation box...');
+
+        // Create recommendation box
+        const recommendationBox = document.createElement('div');
+        recommendationBox.className = 'recommendation-box';
+
+        // Normalize rating for CSS class (handle spaces)
+        const ratingClass = data.recommendation.rating.toLowerCase().replace(/\s+/g, '-');
+        
+        // Use icon from API response if available, otherwise fallback
+        const ratingEmoji = data.recommendation.icon || this.getRatingEmoji(data.recommendation.rating);
+        const iconName = data.recommendation.icon_name || this.getRatingIconName(data.recommendation.rating);
+        
+        console.log('Rating:', data.recommendation.rating);
+        console.log('Rating class:', ratingClass);
+        console.log('Rating emoji:', ratingEmoji);
+        console.log('Icon name:', iconName);
+
+        recommendationBox.innerHTML = `
+            <div class="recommendation-header">
+                <div class="recommendation-title">
+                    <i data-lucide="${iconName}"></i>
+                    <span>Weather Recommendation</span>
+                </div>
+                <button class="close-recommendation" id="close-recommendation">×</button>
+            </div>
+            
+            <div class="recommendation-rating ${ratingClass}">
+                <span class="rating-emoji">${ratingEmoji}</span>
+                <span class="rating-text">${data.recommendation.rating}</span>
+            </div>
+
+            <div class="recommendation-summary">
+                ${data.recommendation.one_liner}
+            </div>
+
+            <div class="weather-details">
+                <div class="weather-detail-item">
+                    <i data-lucide="thermometer"></i>
+                    <span>${data.weather.temp}°C</span>
+                </div>
+                <div class="weather-detail-item">
+                    <i data-lucide="cloud-rain"></i>
+                    <span>${data.weather.precipitation}mm</span>
+                </div>
+                <div class="weather-detail-item">
+                    <i data-lucide="wind"></i>
+                    <span>${data.weather.wind} km/h</span>
+                </div>
+                <div class="weather-detail-item">
+                    <i data-lucide="cloud"></i>
+                    <span>${data.weather.cloud_cover}%</span>
+                </div>
+            </div>
+
+            <div class="recommendation-reasons">
+                <h5>Why This Rating?</h5>
+                ${data.recommendation.why.map(reason => `
+                    <div class="reason-item">
+                        <i data-lucide="${this.getReasonIcon(ratingClass)}"></i>
+                        <span>${reason}</span>
+                    </div>
+                `).join('')}
+            </div>
+
+            ${data.recommendation.alternatives && data.recommendation.alternatives.length > 0 ? `
+                <div class="recommendation-alternatives">
+                    <h5>Alternative Activities</h5>
+                    <div class="alternatives-list">
+                        ${data.recommendation.alternatives.map(alt => `
+                            <span class="alternative-tag">${alt}</span>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : ''}
+        `;
+
+        console.log('Appending recommendation box to panel...');
+        recommendationPanel.appendChild(recommendationBox);
+        recommendationPanel.classList.add('show');
+        console.log('Panel should now be visible');
+
+        // Add close button functionality
+        const closeBtn = document.getElementById('close-recommendation');
+        closeBtn?.addEventListener('click', () => {
+            console.log('Close button clicked');
+            recommendationPanel.classList.remove('show');
+            setTimeout(() => {
+                recommendationPanel.innerHTML = '';
+            }, 300);
+        });
+
+        // Reinitialize Lucide icons
+        this.initLucideIcons();
+        console.log('Recommendation display complete');
+    }
+
+    private getRatingEmoji(rating: string): string {
+        const normalizedRating = rating.toUpperCase().replace(/\s+/g, '_');
+        const emojis: { [key: string]: string } = {
+            'IDEAL': '✅',
+            'MODERATE': '⚠️',
+            'NOT_IDEAL': '❌',
+            'CAUTION': '⚠️',
+            'EXERCISE_CAUTION': '⚠️',
+            'NO-GO': '❌',
+            'NO_GO': '❌'
+        };
+        return emojis[normalizedRating] || '📊';
+    }
+
+    private getRatingIconName(rating: string): string {
+        const normalizedRating = rating.toUpperCase().replace(/\s+/g, '_');
+        const icons: { [key: string]: string } = {
+            'IDEAL': 'check-circle',
+            'MODERATE': 'alert-triangle',
+            'NOT_IDEAL': 'x-circle',
+            'CAUTION': 'alert-triangle',
+            'EXERCISE_CAUTION': 'alert-triangle',
+            'NO-GO': 'x-circle',
+            'NO_GO': 'x-circle'
+        };
+        return icons[normalizedRating] || 'info';
+    }
+
+    private getReasonIcon(ratingClass: string): string {
+        if (ratingClass === 'ideal') {
+            return 'check-circle';
+        } else if (ratingClass === 'moderate') {
+            return 'alert-triangle';
+        } else if (ratingClass === 'not-ideal' || ratingClass === 'no-go') {
+            return 'x-circle';
+        }
+        return 'info';
     }
 
     private saveActivityPreferences(): void {
@@ -318,57 +549,36 @@ class WeatherForecastApp {
 
     private initMap(): void {
         console.log('Initializing map...');
-
-        console.log('Initializing map...');
-        const worldBounds =  L.latLngBounds(L.latLng(-90, -Infinity), L.latLng(90, Infinity));
-
-        // Initialize map centered on NYC with zoom controls in bottom right
+        
         this.map = L.map('map', {
-            zoomControl: false,
-            worldCopyJump: true,
-
-            maxBounds: worldBounds,
-
-            maxBoundsViscosity: 1.0,// Disable default zoom control
+            zoomControl: false
         }).setView([40.7128, -74.0060], 5);
-
-        // Add zoom control to bottom right
+        
         L.control.zoom({
             position: 'bottomright'
         }).addTo(this.map);
-
+        
         console.log('Map created');
 
-        // OpenStreetMap base layer
         const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
-            minZoom: 1.5,
-            bounds: worldBounds,
             attribution: '© OpenStreetMap contributors'
         });
 
-        // NASA Blue Marble layer
         const nasaBlueMarble = L.tileLayer(
             'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpeg',
             {
                 attribution: 'NASA GIBS',
-                maxZoom: 19,
-                maxNativeZoom: 8,
-                minZoom: 1.5,
-                bounds: worldBounds,
+                maxZoom: 8,
                 opacity: 0.7
             }
         );
 
-        // NASA MODIS True Color (recent imagery)
         const nasaModis = L.tileLayer(
             `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/${this.getYesterdayDate()}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`,
             {
                 attribution: 'NASA EOSDIS GIBS',
-                maxZoom: 19,
-                minZoom: 1.5,
-                maxNativeZoom: 9,
-                bounds: worldBounds,
+                maxZoom: 9,
                 opacity: 0.8
             }
         );
@@ -382,12 +592,10 @@ class WeatherForecastApp {
             "NASA MODIS (Recent)": nasaModis
         };
 
-        // Add layer control to switch between maps (top right)
         L.control.layers(baseMaps, overlayMaps, {
             position: 'topright'
         }).addTo(this.map);
 
-        // Add default layers
         osm.addTo(this.map);
         nasaBlueMarble.addTo(this.map);
         
@@ -489,12 +697,24 @@ class WeatherForecastApp {
         const listContainer = document.getElementById('active-widgets-list');
         if (!listContainer) return;
 
+        // Keep recommendation box if it exists
+        const recommendationBox = document.getElementById('recommendation-box');
+        
         if (this.activeWidgets.size === 0) {
             listContainer.innerHTML = '<div class="empty-state">Drag widgets to activate</div>';
+            if (recommendationBox) {
+                listContainer.insertBefore(recommendationBox, listContainer.firstChild);
+            }
             return;
         }
 
         listContainer.innerHTML = '';
+        
+        // Add recommendation box back if it exists
+        if (recommendationBox) {
+            listContainer.appendChild(recommendationBox);
+        }
+
         this.activeWidgets.forEach((widget, type) => {
             const item = document.createElement('div');
             item.className = 'active-widget-item';

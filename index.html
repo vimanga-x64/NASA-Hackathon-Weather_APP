@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weather Forecast with NASA Maps</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="./src/styles/main.css" />
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
@@ -151,12 +152,16 @@
                 </div>
             </div>
 
+            <!-- Active Widgets Panel -->
             <div id="active-widgets">
                 <h4>Active Layers</h4>
                 <div id="active-widgets-list">
                     <div class="empty-state">Drag widgets to activate</div>
                 </div>
             </div>
+
+            <!-- Weather Recommendation Panel - THIS WAS MISSING! -->
+            <div id="weather-recommendation-panel"></div>
         </main>
     </div>
     <script type="module" src="/src/main.ts"></script>
