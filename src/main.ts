@@ -574,21 +574,6 @@ class WeatherForecastApp {
             attribution: '© OpenStreetMap contributors'
         });
 
-        const provider = new OpenStreetMapProvider();
-        const searchControl = new GeoSearchControl({
-            provider: provider,
-            style: 'bar',
-            showMarker: true,
-            showPopup: false,
-            autoClose: true,
-            retainZoomLevel: false,
-            animateZoom: true,
-            keepResult: true,
-            searchLabel: 'Enter address',
-        });
-
-        this.map.addControl(searchControl)
-
         const nasaBlueMarble = L.tileLayer(
             'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpeg',
             {
