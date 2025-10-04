@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Forecast with NASA Maps</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+    <div id="app">
+        <aside id="sidebar">
+            <h2>Weather Information</h2>
+            <div id="widgets-container">
+                <!-- Weather widgets will go here -->
+            </div>
+            
+            <div id="preferences">
+                <h3>Activity Preferences</h3>
+                <div class="activity-buttons">
+                    <button class="activity-btn" data-activity="hiking">🥾 Hiking</button>
+                    <button class="activity-btn" data-activity="skiing">⛷️ Skiing</button>
+                    <button class="activity-btn" data-activity="camping">⛺ Camping</button>
+                    <button class="activity-btn" data-activity="cycling">🚴 Cycling</button>
+                </div>
+            </div>
+        </aside>
+        
+        <main id="map-container">
+            <div id="map"></div>
+            <div id="layer-controls">
+                <button id="toggle-nasa">NASA Imagery</button>
+                <button id="toggle-weather">Weather Overlay</button>
+            </div>
+        </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
