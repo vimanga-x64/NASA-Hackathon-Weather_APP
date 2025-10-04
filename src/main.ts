@@ -1,6 +1,7 @@
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './styles/main.css';
+import {GeoSearchControl, OpenStreetMapProvider} from "leaflet-geosearch";
 
 // Fix marker icon paths to use CDN
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -318,36 +319,72 @@ class WeatherForecastApp {
 
     private initMap(): void {
         console.log('Initializing map...');
-        
+
+        console.log('Initializing map...');
+        const worldBounds =  L.latLngBounds(L.latLng(-90, -Infinity), L.latLng(90, Infinity));
+
+        // Initialize map centered on NYC with zoom controls in bottom right
         this.map = L.map('map', {
-            zoomControl: false
+            zoomControl: false,
+            worldCopyJump: true,
+
+            maxBounds: worldBounds,
+
+            maxBoundsViscosity: 1.0,// Disable default zoom control
         }).setView([40.7128, -74.0060], 5);
-        
+
+        // Add zoom control to bottom right
         L.control.zoom({
             position: 'bottomright'
         }).addTo(this.map);
-        
+
         console.log('Map created');
 
+        // OpenStreetMap base layer
         const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
+            minZoom: 1.5,
+            bounds: worldBounds,
             attribution: '© OpenStreetMap contributors'
         });
 
+        const provider = new OpenStreetMapProvider();
+        const searchControl = new GeoSearchControl({
+            provider: provider,
+            style: 'bar',
+            showMarker: true,
+            showPopup: false,
+            autoClose: true,
+            retainZoomLevel: false,
+            animateZoom: true,
+            keepResult: true,
+            searchLabel: 'Enter address',
+        });
+
+        this.map.addControl(searchControl)
+
+        // NASA Blue Marble layer
         const nasaBlueMarble = L.tileLayer(
             'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpeg',
             {
                 attribution: 'NASA GIBS',
-                maxZoom: 8,
+                maxZoom: 19,
+                maxNativeZoom: 8,
+                minZoom: 1.5,
+                bounds: worldBounds,
                 opacity: 0.7
             }
         );
 
+        // NASA MODIS True Color (recent imagery)
         const nasaModis = L.tileLayer(
             `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/${this.getYesterdayDate()}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`,
             {
                 attribution: 'NASA EOSDIS GIBS',
-                maxZoom: 9,
+                maxZoom: 19,
+                minZoom: 1.5,
+                maxNativeZoom: 9,
+                bounds: worldBounds,
                 opacity: 0.8
             }
         );
@@ -361,10 +398,12 @@ class WeatherForecastApp {
             "NASA MODIS (Recent)": nasaModis
         };
 
+        // Add layer control to switch between maps (top right)
         L.control.layers(baseMaps, overlayMaps, {
             position: 'topright'
         }).addTo(this.map);
 
+        // Add default layers
         osm.addTo(this.map);
         nasaBlueMarble.addTo(this.map);
         
