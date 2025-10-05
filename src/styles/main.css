@@ -14,6 +14,7 @@ body, html {
 
 #app {
     display: flex;
+    flex-direction: column-reverse;
     height: 100vh;
     width: 100vw;
     position: relative;
@@ -22,8 +23,9 @@ body, html {
 
 .toggle-btn {
     position: fixed;
-    top: 20px;
-    left: 364px;
+    bottom: 230px;
+    right: 20px;
+    left: auto;
     width: 32px;
     height: 32px;
     background: rgba(255, 255, 255, 0.9);
@@ -60,16 +62,15 @@ body, html {
 }
 
 #sidebar {
-    width: 380px;
-    min-width: 380px;
-    padding: 24px;
-    overflow-y: auto;
-    overflow-x: hidden;
+    width: 100%;
+    padding: 16px;
+    overflow-y: hidden;
+    overflow-x: auto;
     background: rgba(243, 243, 243, 0.7);
     backdrop-filter: blur(60px) saturate(180%);
     -webkit-backdrop-filter: blur(60px) saturate(180%);
-    border-right: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.08);
     z-index: 1001;
     position: relative;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -77,10 +78,10 @@ body, html {
 }
 
 #sidebar.collapsed {
-    width: 0;
-    min-width: 0;
+    height: 0;
+    min-height: 0;
     padding: 0;
-    border-right: none;
+    border-top: none;
     overflow: hidden;
 }
 
@@ -90,14 +91,18 @@ body, html {
 }
 
 #sidebar.collapsed ~ .toggle-btn {
-    left: 20px;
-}
-
-#sidebar.collapsed ~ .toggle-btn i {
+    bottom: 20px;
     transform: rotate(180deg);
 }
 
+#sidebar.collapsed ~ .toggle-btn i {
+    transform: rotate(0deg);
+}
+
 .sidebar-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: opacity 0.3s;
 }
 
@@ -121,9 +126,10 @@ body, html {
 }
 
 #widgets-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-direction: row;
     gap: 12px;
+    padding-bottom: 10px;
 }
 
 .weather-widget {
@@ -737,7 +743,7 @@ input[type="checkbox"]:hover {
     }
 
     .main-search-form {
-        flex-direction: column;
+        flex-direction: row;
         align-items: stretch;
     }
     
@@ -1069,7 +1075,7 @@ svg {
 
 .weather-detail-item {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     gap: 10px;
     padding: 16px 14px;
