@@ -25,7 +25,7 @@ This is a web application that provides personalized activity recommendations ba
   - `requests` for API calls
 
 - **APIs Used**:
-  - OpenWeatherMap (for weather layer tiles)
+  - NASA Power (for weather data)
   - Nominatim (for geocoding/location search)
   - NASA GIBS (for satellite map layers)
 
