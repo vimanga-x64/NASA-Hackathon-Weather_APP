@@ -756,10 +756,12 @@ class WeatherForecastApp {
             const item = document.createElement('div');
             item.className = 'active-widget-item';
             item.innerHTML = `
-                <i data-lucide="${widget.icon}" class="widget-icon"></i>
                 <div class="active-widget-info">
-                    <div class="active-widget-name">${widget.name}</div>
-                    <div class="active-widget-value">Active</div>
+                    <i data-lucide="${widget.icon}" class="widget-icon"></i>
+                    <div class="active-widget-details">
+                        <div class="active-widget-name">${widget.name}</div>
+                        <div class="active-widget-value">Active</div>
+                    </div>
                 </div>
                 <button class="remove-widget-btn" data-type="${type}">×</button>
             `;
