@@ -68,9 +68,9 @@ Default heuristics (used only if no custom thresholds provided):
 - Fishing: light wind <8 m/s; avoid thunderstorms; light rain is tolerable.
 
 RATING rules:
-- GO: all conditions within comfort thresholds
+- IDEAL: all conditions within comfort thresholds
 - CAUTION: minor or borderline issues
-- NO-GO: significant safety/weather limitations
+- NOT IDEAL: significant safety/weather limitations
 """
 
     user_prompt = f'''
@@ -84,7 +84,7 @@ Input JSON:
 
 Output STRICTLY as JSON with these keys:
 {{
-  "rating": "GO|CAUTION|NO-GO", // only one rating for all activities
+  "rating": "IDEAL|CAUTION|NOT_IDEAL", // only one rating for all activities
   "why": ["<=12 words", "<=12 words"],  // one for each activity
   "alternatives": ["<=3 words", "<=3 words"],
   "one_liner": "<=22 words summary in English"

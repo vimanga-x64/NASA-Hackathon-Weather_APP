@@ -248,6 +248,10 @@ class WeatherForecastApp {
         const recommendationBox = document.createElement('div');
         recommendationBox.className = 'recommendation-box';
 
+        const ratingDisplayText = data.recommendation.rating.replace(/_/g, ' ');
+
+        console.log(ratingDisplayText)
+
         // Normalize rating for CSS class (handle spaces)
         const ratingClass = data.recommendation.rating.toLowerCase().replace(/\s+/g, '-');
         
@@ -260,6 +264,17 @@ class WeatherForecastApp {
         console.log('Rating emoji:', ratingEmoji);
         console.log('Icon name:', iconName);
 
+        // NASA u gotta pay ur data scientists better
+        const tempStats = data.weather.results.temperature.stats.T2M;
+        const precipStats = data.weather.results.precipitation.stats.PRECTOTCORR;
+        const windStats = data.weather.results.wind.stats.WS10M;
+        const cloudStats = data.weather.results.clouds.stats.CLOUD_AMT;
+
+        const tempDisplay = tempStats.mean === -999 ? 'n/a' : `${Math.round(tempStats.mean)}°C`;
+        const precipDisplay = precipStats.mean < 0 ? `${Math.round(precipStats.max)}mm` : `${Math.round(precipStats.mean)}mm`;
+        const windDisplay = windStats.mean < 0 ? `${Math.round(windStats.max)} km/h` : `${Math.round(windStats.mean)} km/h`;
+        const cloudDisplay = cloudStats.mean === -999 ? 'n/a' : `${Math.round(cloudStats.mean)}%`;
+
         recommendationBox.innerHTML = `
             <div class="recommendation-header">
                 <div class="recommendation-title">
@@ -271,7 +286,7 @@ class WeatherForecastApp {
             
             <div class="recommendation-rating ${ratingClass}">
                 <span class="rating-emoji">${ratingEmoji}</span>
-                <span class="rating-text">${data.recommendation.rating}</span>
+                <span class="rating-text">${ratingDisplayText}</span>
             </div>
 
             <div class="recommendation-summary">
@@ -281,19 +296,19 @@ class WeatherForecastApp {
             <div class="weather-details">
                 <div class="weather-detail-item">
                     <i data-lucide="thermometer"></i>
-                    <span>${Math.round(data.weather.results.temperature.stats.T2M.mean)}°C</span>
+                    <span>${tempDisplay}</span>
                 </div>
                 <div class="weather-detail-item">
                     <i data-lucide="cloud-rain"></i>
-                    <span>${data.weather.results.precipitation.stats.PRECTOTCORR.mode}mm</span>
+                    <span>${precipDisplay}</span>
                 </div>
                 <div class="weather-detail-item">
                     <i data-lucide="wind"></i>
-                    <span>${Math.round(data.weather.results.wind.stats.WS10M.max)} km/h</span>
+                    <span>${windDisplay}</span>
                 </div>
                 <div class="weather-detail-item">
                     <i data-lucide="cloud"></i>
-                    <span>${Math.round(data.weather.results.clouds.stats.CLOUD_AMT.mean)}%</span>
+                    <span>${cloudDisplay}</span>
                 </div>
             </div>
 
