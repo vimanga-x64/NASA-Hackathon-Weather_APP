@@ -2,6 +2,8 @@
 
 This is a web application that provides personalized activity recommendations based on weather conditions. It combines an interactive map using NASA's Blue Marble and MODIS satellite imagery with a Python-based backend to generate predictions for user-selected activities.
 
+**Disclosure:** Artificial Intelligence was used to facilitate coding and debugging of this project.
+
 <img width="1919" height="956" alt="image" src="https://github.com/user-attachments/assets/dfc55b0b-a4f5-4164-817b-33cc73bba758" />
 
 ## Features
@@ -24,12 +26,12 @@ This is a web application that provides personalized activity recommendations ba
 - **Backend**:
   - Python
   - Flask
-  - `requests` for API calls
 
 - **APIs Used**:
   - NASA Power (for weather data)
   - Nominatim (for geocoding/location search)
   - NASA GIBS (for satellite map layers)
+  - OpenAI API (for user friendly recommendations)
 
 ## Prerequisites
 
