@@ -289,7 +289,7 @@ class WeatherForecastApp {
                 </div>
                 <div class="weather-detail-item">
                     <i data-lucide="wind"></i>
-                    <span>${Math.round(data.weather.results.wind.stats.WS10M.mode * 3.6)} km/h</span>
+                    <span>${Math.round(data.weather.results.wind.stats.WS10M.max)} km/h</span>
                 </div>
                 <div class="weather-detail-item">
                     <i data-lucide="cloud"></i>
