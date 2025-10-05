@@ -2,6 +2,8 @@
 
 This is a web application that provides personalized activity recommendations based on weather conditions. It combines an interactive map using NASA's Blue Marble and MODIS satellite imagery with a Python-based backend to generate predictions for user-selected activities.
 
+<img width="1919" height="956" alt="image" src="https://github.com/user-attachments/assets/dfc55b0b-a4f5-4164-817b-33cc73bba758" />
+
 ## Features
 
 - **Interactive Map**: Utilizes Leaflet.js to display an interactive map with OpenStreetMap, NASA Blue Marble, and NASA MODIS layers.
@@ -114,4 +116,4 @@ The Vite development server will start, and you can access the application at `h
 3.  **Choose Activities**: Use the "Activities" dropdown to select one or more activities you are interested in.
 4.  **Get Prediction**: Click the "Predict" button.
 5.  **View Recommendation**: A recommendation card will appear in the sidebar with a rating, weather details, and reasons for the prediction.
-6.  **Explore Map Layers**: Drag weather widgets from the "Weather Widgets" section onto the map to see live data overlays. Active layers can be managed in the "Active Widgets" list.
+6.  **Explore Map Layers**: Drag weather widgets from the "Weather Widgets" section onto the map to tailor your prediction (i.e., if you only need precipitation or temperature). Active layers can be managed in the "Active Widgets" list.
