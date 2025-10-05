@@ -13,6 +13,7 @@ This is a web application that provides personalized activity recommendations ba
 - **Location Search**: Search for any location worldwide using the Nominatim API.
 - **Activity-Based Predictions**: Select your preferred activities (e.g., hiking, running, stargazing) and get a detailed weather recommendation.
 - **Detailed Recommendations**: The recommendation includes a rating (e.g., "Ideal", "Moderate", "Not Ideal"), a one-liner summary, a breakdown of why the rating was given, and suggestions for alternative activities.
+- **JSON Data Download**: The recommendation can be downloaded as JSON, together with the data from NASA POWER.
 - **Python/Flask Backend**: A simple yet powerful backend that fetches weather data and uses a model to generate recommendations.
 
 ## Tech Stack
