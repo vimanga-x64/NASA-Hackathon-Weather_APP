@@ -21,15 +21,17 @@ def recommend():
         return jsonify({'error': 'Missing required fields'}), 400
     lat = location.get('latitude')
     lon = location.get('longitude')
+    weather_params = data.get('weather_params')
 
     if not date or not preferences or lat is None or lon is None:
         return jsonify({'error': 'Missing required fields: location.latitude, location.longitude, date, preferences'}), 400
 
     try:
-        weather_params = [
-            "temperature", "precipitation", "wind", "humidity", 
-            "clouds", "visibility", "pressure", "uvindex"
-        ]
+        if not weather_params:
+            weather_params = [
+                "temperature", "precipitation", "wind", "humidity", 
+                "clouds", "visibility", "pressure", "uvindex"
+            ]
         
         weather = get_weather_data(
             lat=float(lat),

@@ -193,7 +193,8 @@ class WeatherForecastApp {
                     longitude: this.selectedLocation.lon
                 },
                 date: datePicker.value,
-                preferences: this.selectedActivities
+                preferences: this.selectedActivities,
+                weather_params: Array.from(this.activeWidgets.keys())
             };
 
             console.log('Sending request:', requestData);
@@ -264,16 +265,22 @@ class WeatherForecastApp {
         console.log('Rating emoji:', ratingEmoji);
         console.log('Icon name:', iconName);
 
-        // NASA u gotta pay ur data scientists better
-        const tempStats = data.weather.results.temperature.stats.T2M;
-        const precipStats = data.weather.results.precipitation.stats.PRECTOTCORR;
-        const windStats = data.weather.results.wind.stats.WS10M;
-        const cloudStats = data.weather.results.clouds.stats.CLOUD_AMT;
+        const getStat = (param: string, type: string) => {
+            if (data.weather.results[param] && data.weather.results[param].stats && data.weather.results[param].stats[type]) {
+                return data.weather.results[param].stats[type];
+            }
+            return null;
+        };
 
-        const tempDisplay = tempStats.mean === -999 ? 'n/a' : `${Math.round(tempStats.mean)}°C`;
-        const precipDisplay = precipStats.mean < 0 ? `${Math.round(precipStats.max)}mm` : `${Math.round(precipStats.mean)}mm`;
-        const windDisplay = windStats.mean < 0 ? `${Math.round(windStats.max)} km/h` : `${Math.round(windStats.mean)} km/h`;
-        const cloudDisplay = cloudStats.mean === -999 ? 'n/a' : `${Math.round(cloudStats.mean)}%`;
+        const tempStats = getStat('temperature', 'T2M');
+        const precipStats = getStat('precipitation', 'PRECTOTCORR');
+        const windStats = getStat('wind', 'WS10M');
+        const cloudStats = getStat('clouds', 'CLOUD_AMT');
+
+        const tempDisplay = tempStats && tempStats.mean !== -999 ? `${Math.round(tempStats.mean)}°C` : 'N/A';
+        const precipDisplay = precipStats ? (precipStats.mean < 0 ? `${Math.round(precipStats.max)}mm` : `${Math.round(precipStats.mean)}mm`) : 'N/A';
+        const windDisplay = windStats ? (windStats.mean < 0 ? `${Math.round(windStats.max)} km/h` : `${Math.round(windStats.mean)} km/h`) : 'N/A';
+        const cloudDisplay = cloudStats && cloudStats.mean !== -999 ? `${Math.round(cloudStats.mean)}%` : 'N/A';
 
         recommendationBox.innerHTML = `
             <div class="recommendation-header">
