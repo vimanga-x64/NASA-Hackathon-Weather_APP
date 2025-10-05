@@ -281,19 +281,19 @@ class WeatherForecastApp {
             <div class="weather-details">
                 <div class="weather-detail-item">
                     <i data-lucide="thermometer"></i>
-                    <span>${data.weather.temp}°C</span>
+                    <span>${Math.round(data.weather.results.temperature.stats.T2M.mean)}°C</span>
                 </div>
                 <div class="weather-detail-item">
                     <i data-lucide="cloud-rain"></i>
-                    <span>${data.weather.precipitation}mm</span>
+                    <span>${data.weather.results.precipitation.stats.PRECTOTCORR.mode}mm</span>
                 </div>
                 <div class="weather-detail-item">
                     <i data-lucide="wind"></i>
-                    <span>${data.weather.wind} km/h</span>
+                    <span>${Math.round(data.weather.results.wind.stats.WS10M.mode * 3.6)} km/h</span>
                 </div>
                 <div class="weather-detail-item">
                     <i data-lucide="cloud"></i>
-                    <span>${data.weather.cloud_cover}%</span>
+                    <span>${Math.round(data.weather.results.clouds.stats.CLOUD_AMT.mean)}%</span>
                 </div>
             </div>
 
